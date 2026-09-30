@@ -18,6 +18,14 @@ rule shell_spawned_by_defender_engine {
     ($e.principal.process.file.names = "cmd.exe" or $e.principal.process.file.names = "powershell.exe" or $e.principal.process.file.names = "pwsh.exe" or $e.principal.process.file.names = "conhost.exe" or $e.principal.process.file.names = "wscript.exe" or $e.principal.process.file.names = "cscript.exe")
     $e.additional.fields["initiating_process_integrity_level"] = "System"
 
+  outcome:
+    $target_host = array_distinct($e.principal.hostname)
+    $principal_process_pid = array_distinct($e.principal.process.pid)
+    $principal_process_name = array_distinct($e.principal.process.file.names)
+    $principal_process_command_line = array_distinct($e.principal.process.command_line)
+    $principal_parent_process_pid = array_distinct($e.principal.process.parent_process.pid)
+    $principal_parent_process_name = array_distinct($e.principal.process.parent_process.file.names)
+
   condition:
     $e
 
