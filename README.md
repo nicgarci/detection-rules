@@ -1,1 +1,1 @@
-"# detection-rules" 
+# detection-rules
