@@ -6,7 +6,8 @@ rule shell_spawned_by_defender_engine {
     description = "Detects an interactive shell or scripting host spawned by the Microsoft Defender engine (MsMpEng.exe) at SYSTEM integrity. Consistent with TOCTOU / path-redirection privilege escalation against Defender (e.g., RoguePlanet, BlueHammer, RedSun)."
     reference = "https://www.picussecurity.com/resource/blog/rogueplanet-anatomy-of-the-nightmare-eclipse-microsoft-defender-zero-day#detection-engineering"
     data_source = "Microsoft Defender for Endpoint"
-    severity = "High"
+    severity = "Medium"
+    priority = "Medium"
     mitre_attack_tactic = "TA0002"
     mitre_attack_technique = "T1059"
 
