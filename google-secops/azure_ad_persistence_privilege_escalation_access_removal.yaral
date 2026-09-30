@@ -1,0 +1,54 @@
+rule azure_ad_persistence_privilege_escalation_access_removal {
+  
+  meta:
+    rule_name = "Azure AD Newly Created Account Gets GlobalAdministrator Role Assigned and Removes Said Role From Other Accounts"
+    description = "Detects a newly created Azure AD account acquiring GlobalAdministrator role and removing other users from such role."
+    author = "nicgarci"
+    references = "https://www.microsoft.com/en-us/security/blog/2022/03/22/dev-0537-criminal-actor-targeting-organizations-for-data-exfiltration-and-destruction/"
+    data_source = "Entra ID, Azure AD"
+    severity = "Medium"
+    tactic = "T1136"
+    technique = "T1136.003"
+    false_positives = "An existing GlobalAdministrator account gets replaced by a new account"
+
+  events:
+    $create.metadata.vendor_name = "Microsoft"
+    $create.metadata.product_name = "Azure AD"
+    $create.metadata.event_type = "USER_CREATION"
+    $create.target.user.product_object_id = $user
+
+    $promote.metadata.vendor_name = "Microsoft"
+    $promote.metadata.product_name = "Azure AD"
+    $promote.metadata.product_event_type = "Add member to role."
+    $promote.target.user.product_object_id = $user
+    $promote.extracted.fields["ModifiedProperties[1].Name"] = "Role.DisplayName"
+    $promote.extracted.fields["ModifiedProperties[1].NewValue"] = "Global Administrator"
+
+    $create.metadata.event_timestamp.seconds <= 
+      $promote.metadata.event_timestamp.seconds
+
+    $demote.metadata.vendor_name = "Microsoft"
+    $demote.metadata.product_name = "Azure AD"
+    $demote.metadata.product_event_type = "Remove member from role."
+    $demote.target.user.product_object_id != $user
+    $demote.target.user.product_object_id = $otherUser
+    $demote.principal.user.userid = $user
+    $demote.extracted.fields["ModifiedProperties[1].Name"] = "Role.DisplayName"
+    $demote.extracted.fields["ModifiedProperties[1].NewValue"] = ""
+    $demote.extracted.fields["ModifiedProperties[1].OldValue"] = "Global Administrator"
+
+    $promote.metadata.event_timestamp.seconds <= 
+      $demote.metadata.event_timestamp.seconds
+
+  match:
+    $user over 6h
+
+  outcome:
+    $principal_users = array_distinct($create.target.user.userid)
+    $count_target_users = count_distinct($demote.metadata.id)
+    $target_users = array_distinct($demote.target.user.userid)
+
+  condition:
+    $create and $promote and $demote
+    
+}
