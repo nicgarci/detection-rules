@@ -7,7 +7,8 @@ rule fortigate_ssl_web_vpn_tunnel_up_following_login_failed {
     reference = "https://cert.pl/uploads/docs/CERT_Polska_Energy_Sector_Incident_Report_2025.pdf"
     data_source = "Fortigate"
     severity = "Medium"
-    mitre_attack_tactic = "T1078"
+    mitre_attack_tactic = "TA0001"
+    mitre_attack_technique = "T1078"
     false_positives = "The account or the VPN configuration has changed during the triggering period."
 
   events:

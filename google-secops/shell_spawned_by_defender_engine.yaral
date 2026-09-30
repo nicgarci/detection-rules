@@ -1,0 +1,23 @@
+rule shell_spawned_by_defender_engine {
+
+  meta:
+    status = "experimental"
+    author = "nicgarci"
+    description = "Detects an interactive shell or scripting host spawned by the Microsoft Defender engine (MsMpEng.exe) at SYSTEM integrity. Consistent with TOCTOU / path-redirection privilege escalation against Defender (e.g., RoguePlanet, BlueHammer, RedSun)."
+    reference = "https://www.picussecurity.com/resource/blog/rogueplanet-anatomy-of-the-nightmare-eclipse-microsoft-defender-zero-day#detection-engineering"
+    data_source = "Microsoft Defender for Endpoint"
+    severity = "High"
+    mitre_attack_tactic = "TA0002"
+    mitre_attack_technique = "T1059"
+
+  events:
+    $e.metadata.product_name = "Microsoft Defender for Endpoint"
+    $e.metadata.event_type = "PROCESS_LAUNCH"
+    $e.principal.process.parent_process.file.names = "MsMpEng.exe"
+    ($e.principal.process.file.names = "cmd.exe" or $e.principal.process.file.names = "powershell.exe" or $e.principal.process.file.names = "pwsh.exe" or $e.principal.process.file.names = "conhost.exe" or $e.principal.process.file.names = "wscript.exe" or $e.principal.process.file.names = "cscript.exe")
+    $e.additional.fields["initiating_process_integrity_level"] = "System"
+
+  condition:
+    $e
+
+}

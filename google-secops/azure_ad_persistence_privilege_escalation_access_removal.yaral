@@ -8,8 +8,9 @@ rule azure_ad_persistence_privilege_escalation_access_removal {
     reference = "https://www.microsoft.com/en-us/security/blog/2022/03/22/dev-0537-criminal-actor-targeting-organizations-for-data-exfiltration-and-destruction/"
     data_source = "Entra ID, Azure AD"
     severity = "Medium"
-    mitre_attack_tactic = "T1136"
-    mitre_attack_technique = "T1136.003"
+    mitre_attack_tactic = "TA0003"
+    mitre_attack_technique = "T1136"
+    mitre_attack_subtechnique = "T1136.003"
     false_positives = "An existing GlobalAdministrator account gets replaced by a new account"
 
   events:
