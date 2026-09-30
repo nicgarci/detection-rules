@@ -1,0 +1,38 @@
+rule fortigate_ssl_web_vpn_tunnel_up_following_login_failed {
+  
+  meta:
+    rule_name = "A successful SSL-Web VPN Tunnel has been established after several login failures in the same Fortigate device."
+    author = "nicgarci"
+    references = "https://cert.pl/uploads/docs/CERT_Polska_Energy_Sector_Incident_Report_2025.pdf"
+    data_source = "Fortigate"
+    severity = "Medium"
+    tactic = "T1078"
+    false_positives = "The account or the VPN configuration has changed during the triggering period."
+
+  events:
+    $failed.metadata.vendor_name = "Fortinet"
+    $failed.metadata.product_name = "Fortigate"
+    $failed.security_result.action = "BLOCK"
+    $failed.principal.resource.attribute.labels["tunneltype"] = "ssl-web"
+    $failed.metadata.description = "SSL VPN login fail"
+    $failed.principal.ip = $remip
+    $failed.intermediary.asset.hardware.serial_number = $devid
+
+    $success.metadata.vendor_name = "Fortinet"
+    $success.metadata.product_name = "Fortigate"
+    $success.metadata.event_type = "NETWORK_CONNECTION"
+    $success.security_result.action = "ALLOW"
+    $success.principal.resource.attribute.labels["tunneltype"] = "ssl-web"
+    $success.principal.ip = $remip
+    $success.intermediary.asset.hardware.serial_number = $devid
+
+    $failed.metadata.event_timestamp.seconds <=
+        $success.metadata.event_timestamp.seconds
+
+  match:
+    $remip, $devid over 1h
+
+  condition:
+    #failed >= 3 and $success
+    
+}
