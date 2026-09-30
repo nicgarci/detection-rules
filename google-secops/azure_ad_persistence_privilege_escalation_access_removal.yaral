@@ -1,14 +1,15 @@
 rule azure_ad_persistence_privilege_escalation_access_removal {
   
   meta:
+    status: "experimental"
     rule_name = "Azure AD Newly Created Account Gets GlobalAdministrator Role Assigned and Removes Said Role From Other Accounts"
     description = "Detects a newly created Azure AD account acquiring GlobalAdministrator role and removing other users from such role."
     author = "nicgarci"
-    references = "https://www.microsoft.com/en-us/security/blog/2022/03/22/dev-0537-criminal-actor-targeting-organizations-for-data-exfiltration-and-destruction/"
+    reference = "https://www.microsoft.com/en-us/security/blog/2022/03/22/dev-0537-criminal-actor-targeting-organizations-for-data-exfiltration-and-destruction/"
     data_source = "Entra ID, Azure AD"
     severity = "Medium"
-    tactic = "T1136"
-    technique = "T1136.003"
+    mitre_attack_tactic = "T1136"
+    mitre_attack_technique = "T1136.003"
     false_positives = "An existing GlobalAdministrator account gets replaced by a new account"
 
   events:
