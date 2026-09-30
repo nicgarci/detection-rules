@@ -34,6 +34,11 @@ rule fortigate_ssl_web_vpn_tunnel_up_following_login_failed {
   match:
     $remip, $devid over 1h
 
+  outcome:
+    $failed_login_count = count_distinct($failed.metadata.id)
+    $target_device_ip = array_distinct($success.target.ip)
+    $principal_ip = array_distinct($success.principal.ip)
+
   condition:
     #failed >= 3 and $success
     
