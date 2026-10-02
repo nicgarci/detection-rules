@@ -1,0 +1,41 @@
+rule aws_cloudtrail_remove_mfa_followed_by_addition {
+
+  meta:
+    status = "experimental"
+    rule_name = "A MFA device removed from a user followed by a new MFA enabled one. This could indicate an account takeover via social engineering."
+    author = "nicgarci"
+    data_source = "AWS CloudTrail"
+    severity = "Medium"
+    priority = "Low"
+    mitre_attack_tactic = "TA0003"
+    mitre_attack_technique = "T1556"
+    mitre_attack_subtechnique = "T1556.006"
+    false_positives = "A legitimate changing of a deprecated MFA method for a newer one."
+
+  events:
+    $remove.metadata.vendor_name = "AMAZON"
+    $remove.metadata.product_name = "AWS CloudTrail"
+    $remove.metadata.product_event_type = "DeactivateMFADevice"
+    $remove.principal.user.user_display_name = $user_id
+
+    $add.metadata.vendor_name = "AMAZON"
+    $add.metadata.product_name = "AWS CloudTrail"
+    $add.metadata.product_event_type = "EnableMFADevice"
+    $add.principal.user.user_display_name = $user_id
+
+    $remove.metadata.event_timestamp.seconds <= 
+      $add.metadata.event_timestamp.seconds
+
+  match:
+    $user_id over 1h
+
+  outcome:
+    $principal_user_display_name = array_distinct($add.principal.user.user_display_name)
+    $recipient_aws_account_id = array_distinct($add.additional.fields["recipientAccountId"])
+    $target_resource_name = array_distinct($add.target.resource.name)
+    $target_resource_product_object_id = array_distinct($add.target.resource.product_object_id)
+
+  condition:
+    $remove and $add
+
+}
