@@ -15,7 +15,14 @@ rule shell_spawned_by_defender_engine {
     $e.metadata.product_name = "Microsoft Defender for Endpoint"
     $e.metadata.event_type = "PROCESS_LAUNCH"
     $e.principal.process.parent_process.file.names = "MsMpEng.exe"
-    ($e.principal.process.file.names = "cmd.exe" or $e.principal.process.file.names = "powershell.exe" or $e.principal.process.file.names = "pwsh.exe" or $e.principal.process.file.names = "conhost.exe" or $e.principal.process.file.names = "wscript.exe" or $e.principal.process.file.names = "cscript.exe")
+    (
+    $e.principal.process.file.names = "cmd.exe" or 
+    $e.principal.process.file.names = "powershell.exe" or 
+    $e.principal.process.file.names = "pwsh.exe" or 
+    $e.principal.process.file.names = "conhost.exe" or 
+    $e.principal.process.file.names = "wscript.exe" or 
+    $e.principal.process.file.names = "cscript.exe"
+    )
     $e.additional.fields["initiating_process_integrity_level"] = "System"
 
   outcome:
