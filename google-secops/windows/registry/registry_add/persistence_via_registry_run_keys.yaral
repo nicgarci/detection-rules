@@ -1,0 +1,37 @@
+rule {
+
+  meta:
+    status = "experimental"
+    author = "nicgarci"
+    description = "Detects the creation of a new entry in Registry Run keys. This is one of the most popular methods of persistence on Windows endpoints."
+    reference = "https://www.fortinet.com/blog/threat-research/analysis-of-new-agent-tesla-spyware-variant"
+    severity = "Medium"
+    priority = "Medium"
+    mitre_attack_tactic = "TA0003"
+    mitre_attack_technique = "T1547.001"
+    false_positives = "Performed by legitimate software for installation and update purposes."
+
+  events:
+    $reg.metadata.product_name = "Microsoft Defender for Endpoint"
+    $reg.metadata.event_type = "REGISTRY_MODIFICATION"
+    $reg.principal.asset.asset_id = $devid
+    (
+    $reg.target.registry.registry_key = /.*\\software\\.*\\currentversion\\.*\\run.*/ nocase or
+    $reg.target.registry.registry_key = /.*\\software\\.*\\currentversion\\run.*/ nocase
+    )
+
+  match:
+    $devid over 30m
+
+  outcome:
+    $target_host = array_distinct($reg.principal.hostname)
+    $principal_user_userid = array_distinct($reg.principal.user.userid)
+    $principal_process_name = array_distinct($reg.principal.process.file.names)
+    $target_registry_key = array_distinct($reg.target.registry.registry_key)
+    $target_registry_value_name = array_distinct($reg.target.registry.registry_value_name)
+    $target_registry_value_data = array_distinct($reg.target.registry.registry_value_data)
+
+  condition:
+    $reg
+
+}
