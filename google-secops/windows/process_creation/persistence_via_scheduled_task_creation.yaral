@@ -1,0 +1,14 @@
+rule {
+
+  meta:
+
+  events:
+    $e.metadata.product_name = "Microsoft Defender for Endpoint"
+    $e.metadata.event_type = "PROCESS_LAUNCH"
+    $e.metadata.process.file.names = "schtasks.exe"
+
+  condition:
+
+  outcome:
+
+}
