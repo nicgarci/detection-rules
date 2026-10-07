@@ -11,5 +11,6 @@ detection-rules/
     ├── network/
     |   ├── fortinet/
     └── windows/
-        └── process_creation
+        ├── process_creation/
+        └── registry/
 ```
