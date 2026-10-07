@@ -1,14 +1,37 @@
 rule {
 
   meta:
+    status = "experimental"
+    author = "nicgarci"
+    description = "Detects the creation of a new Scheduled Task that runs a VBS file. This is one of the most popular methods of persistence and execution on Windows endpoints."
+    reference = "https://unit42.paloaltonetworks.com/unit42-rancor-targeted-attacks-south-east-asia-using-plaintee-ddkong-malware-families/"
+    severity = "Medium"
+    priority = "Medium"
+    mitre_attack_tactic = "TA0002"
+    mitre_attack_technique = "T1053.005"
+    false_positives = "Legitimate schedule task creation for automation purposes by an Administrator."
 
   events:
-    $e.metadata.product_name = "Microsoft Defender for Endpoint"
-    $e.metadata.event_type = "PROCESS_LAUNCH"
-    $e.metadata.process.file.names = "schtasks.exe"
+    $task.metadata.product_name = "Microsoft Defender for Endpoint"
+    $task.metadata.event_type = "PROCESS_LAUNCH"
+    $task.metadata.process.file.names = "schtasks.exe"
+    (
+    $task.principal.process.command_line = /schtasks.*\s+\/create.*/ nocase and
+    $task.principal.process.command_line = /.*\s+\/tn\s+.*/ nocase and
+    $task.principal.process.command_line = /.*\s+\/tr\s+.*\.vbs.*/ nocase
+    )
 
-  condition:
+  match:
+    $task over 30m
 
   outcome:
+    $target_host = array_distinct($task.principal.hostname)
+    $principal_user_userid = array_distinct($task.principal.user.userid)
+    $principal_process_name = array_distinct($task.principal.process.file.names)
+    $principal_parent_process_name = array_distinct($task.principal.process.parent_process.file.names)
+    $principal_process_command_line = array_distinct($task.principal.process.command_line)
+
+  condition:
+    $task
 
 }
